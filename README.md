@@ -214,7 +214,8 @@ These observations exceeded the Cook’s Distance threshold:
 ## Clone the repository
 
 ```bash
-git clone https://github.com/your-username/your-repository-name.git
+git clone https://github.com/pdhatemwa/Statistical-linear-models-regression-analysis
+.git
 ```
 
 ## Open the project in RStudio
