@@ -1,0 +1,355 @@
+---
+title: " Statistical Linear Models Assigment "
+author: "Patrick Dhatemwa, Ian Mulindwa, Cynthia Musangi, Francis Gitau"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Objective : Fit a linear model with mpg as the dependent variable and wt and hp as the independent variables.
+
+Loading the mtcars dataset using the code below:
+``` {r attach mtcars}
+                    #  data(mtcars)
+                    # attach(mtcars)
+```
+
+## For a better understanding of the data, we view the first 5 rows.
+
+```{r mtcars}
+
+head(mtcars)
+
+```
+
+## To fit the model, we start by defining varibales
+
+```{r Fitting the model.}
+
+#----------------------------------------
+#          QUESTION 1 (a)
+#----------------------------------------
+
+
+# Set mpg as the independent variable. (Y)
+Y <- (mtcars$mpg)
+Y
+
+
+```
+
+## We now go ahead to define the dependent variable. (X1 [wt], and X2 [hp])
+
+After defining the dependent variables, we then go ahead to find the transpose of the matrix of dependent variables to meet our objective.
+
+```{r independent variables, eval=TRUE}
+
+
+# Set wt as the dependent variable. (X)
+data(mtcars)
+attach(mtcars)
+X <- cbind(wt, hp)
+X_t <- t(X) # find the transpose of X.
+X_t # Call the function.
+
+
+```
+
+##Step 1:  Fitting the linear model.
+## OLS formulation.
+
+```{r OLS formulation}
+
+N <- X_t%*%X
+N # Call the function
+
+```
+
+
+##Step 2: Obtain the inverse of the matrix using the solve function.
+```{r}
+# Obtain the inverse of the matrix resulting from the product of the X matrix and its transpose.
+solve(N)
+```
+
+## Step 3: Now we obtain the matrix obtained from the product of X-transpose and the Y-matrix
+``` {r}
+f <- X_t%*%Y
+f
+```
+
+ 
+# Note: according to OLS, B = [([X_t][X])^-1] * [(X_t)*(Y)]
+# But according to our code, that will be Solve(N) * f
+
+## Step 4 : Final OLS formulation.
+# -------------------------------
+```{r}
+B = solve(N)%*%f
+B # Call B
+```
+# -------------------------------
+
+## Step 5 : The linear model.
+
+
+```{r}
+model <- lm(mpg ~ wt + hp, data = mtcars)
+show(model)
+summary(model)
+```
+
+---
+
+i)	P- value :  9.109e-12
+This P-value is less than 0.05, and therefore we can say that our model is significant.
+
+ii)	Interpretation of coefficients.
+Bo - The minimum value of mpg when hp and (wt) are zero. (i.e. 37.23) which is the minimum level of fuel efficiency.
+
+B1 – holding horsepower constant, a unit increase in (wt) decreases fuel efficiency (mpg) by 3.87783 units. Meaning if the weight of the car increases by about 1000 pounds, full efficiency drops by about 3.88 mpg
+
+B2 - holding weight constant, a unit increase in horse power decreases (mpg) by 0.03177 units 
+
+iii)	a) R-squared Value (0.8268) : This means that 82.68% of the variation in the model can be explained by (wt) and (hp).
+
+  b) Adjusted R-squared value (0.8148) : This means that 81.48% of the variation in the model can still be explained by (wt) and (hp) meaning that the model is still very significant since the difference between the R-squared and the adjusted R-squared is not very big.
+  
+---
+
+
+## B) REGRESSION ASSUMPTIONS.
+```{r}
+# i)	 Check linearity and interpret the findings.
+
+plot(model$fitted.values, resid(model),
+     xlab = "Fitted values",
+     ylab = "Residuals",
+     main = "Residuals vs Fitted Values")
+abline(h = 0, col = "red")
+```
+
+
+### Assumption 1: LINEARITY
+
+We are checking to see if residuals are randomly scattered around zero and not having an obvious pattern or curve which violates linearity.
+According to the above plot, linearity is not completely violated.
+
+
+### Assumption 2 : Check independence of errors.
+
+```{r, eval=TRUE}
+#install.packages("lmtest")
+#install.packages("car")
+
+library(lmtest)
+library(car)
+
+dwtest(model)
+```
+
+Here we are checking whether residuals are independent of one another.
+
+
+Hypotheses
+H0 : Errors are independent
+
+H1 : Errors are auto-correlated.
+
+Interpretation
+
+If p-value > 0.05, we fail to reject H0. Independence is acceptable.
+If p-value < 0.05, there may be autocorrelation.
+
+But since p-value < 0.05, we conculde that there may be auto-correlation.
+
+
+
+### Assumption 3 : Check constant variance (homoscedasticity).
+```{r}
+plot(model$fitted.values, resid(model),
+     xlab = "Fitted values",
+     ylab = "Residuals",
+     main = "Homoscedasticity Check")
+abline(h = 0, col = "red")
+```
+Here we want the residuals to have roughly equal spread across fitted values.
+
+# Interpretation
+If residuals spread evenly, homoscedasticity is satisfied.
+If the residuals form a funnel shape, variance is not constant.
+
+And according to the above plot, homoscedasticity is satisfied, since the residuals spread evenly.
+
+### Assumption 4 : Check the normality of residuals.
+```{r normality_of_residuals}
+hist(resid(model),
+     main = "Histogram of Residuals",
+     xlab = "Residuals")
+
+qqnorm(resid(model))
+qqline(resid(model), col = "red")
+
+shapiro.test(resid(model))
+```
+### Assumption 5 : Check for multicollinearity.
+```{r multicollinearity}
+library(car)
+vif(model)
+```
+Here we are checking whether weight, (wt) and horse power, (hp) are too highly correlated.
+
+#Interpretation
+
+Common rule:
+VIF < 5      acceptable
+VIF 5 to 10  concerning
+VIF > 10     serious multicollinearity
+
+If VIF values are below 5, multicollinearity is not a serious problem.
+
+Since both values for wt, and hp are < 5, the test outcome is accessible.
+
+### C) Perform Case Diagnostics.
+## (i)Standard residuals
+```{r}
+std_res <- rstandard(model)
+std_res
+```
+
+```{r}
+# To identify possible outliers
+which(abs(std_res) > 2)
+```
+
+Common rule:
+|standardized residual| > 2  possible outlier
+|standardized residual| > 3  serious outlier
+These identify observations whose actual mpg is unusually far from predicted mpg.
+
+Car	Standardized  -------   Residual
+Chrysler Imperial -------	  2.3545
+Fiat 128	        -------   2.3319
+Toyota Corolla	  -------   2.3786
+
+## (ii) Cook's Distance
+```{r}
+cook <- cooks.distance(model)
+cook
+
+plot(cook, type = "h",
+     main = "Cook's Distance",
+     ylab = "Cook's Distance")
+abline(h = 4 / nrow(mtcars), col = "red")
+
+# To identify influential cases
+which(cook > 4 / nrow(mtcars))
+
+```
+
+## Interpretation.
+
+Cook’s distance checks whether one observation strongly affects the regression model.
+Rule:
+Cook′s Distance > 4/n
+ 
+Since n=32:  4/32 = 0.125
+Any case above 0.125 may be influential.
+
+According to our output,
+The following are influetial to out liear regression model, meaning removing would significantly affect our model.
+
+Car               ------  Cook’s Distance
+Chrysler Imperial ------	0.4236
+Fiat 128	        ------  0.1574
+Toyota Corolla	  ------  0.2087
+Maserati Bora	    ------  0.2720
+
+Which exceed the threshold of 0.125
+
+Cook’s Distance:
+0.4236
+This is the largest influence in the model.
+Meaning, the Chrysler Imperial substantially affects the regression estimates. Removing it would noticeably change the fitted regression model.
+
+## (iii) Leverage
+```{r}
+lev <- hatvalues(model)
+lev
+
+plot(lev, type = "h",
+     main = "Leverage Values",
+     ylab = "Leverage")
+abline(h = 2 * 3 / nrow(mtcars), col = "red")
+
+# To identify high leverage cases.
+which(lev > 2 * 3 / nrow(mtcars))
+```
+
+Interpretation
+High leverage observations have unusual predictor values. They may not be outliers in mpg, but their wt and hp combinations are unusual.
+
+## (iv) Covarince Ratio
+```{r}
+cov_ratio <- covratio(model)
+cov_ratio
+
+# We now check for influental cases
+n <- nrow(mtcars)
+p <- 3
+
+lower <- 1 - (3 * p / n)
+upper <- 1 + (3 * p / n)
+
+lower
+upper
+
+which(cov_ratio < lower | cov_ratio > upper)
+```
+
+Covariance ratio checks whether removing a case substantially changes the precision of the model estimates.
+ 
+So the acceptable range is approximately:
+0.71875 to 1.28125
+Cases outside this range may be influential. namely: 
+1) Cadillac Fleetwood
+2) Lincoln Continental
+3) Fiat 128
+4) Toyota Corolla
+5) Ford Pantera L
+6) Maserati Bora
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
