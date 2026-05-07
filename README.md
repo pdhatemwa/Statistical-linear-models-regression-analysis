@@ -184,9 +184,7 @@ The following vehicles showed notable influence on the fitted model:
 
 These observations exceeded the Cook’s Distance threshold:
 
-\[
-\frac{4}{n} = \frac{4}{32} = 0.125
-\]
+4/n = 4/32 = 0.125
 
 ---
 
@@ -258,4 +256,3 @@ This project demonstrates the application of multiple linear regression analysis
 
 The analysis highlights both the strengths and limitations of linear modeling when applied to observational datasets and emphasizes the importance of validating regression assumptions before interpreting results.
 
-Because regression without diagnostics is basically statistical astrology.
